@@ -1,0 +1,3 @@
+[submodule "pipecat-esp32"]
+	path = pipecat-esp32
+	url = https://github.com/pipecat-ai/pipecat-esp32.git

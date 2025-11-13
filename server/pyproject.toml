@@ -1,0 +1,12 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.121.1",
+    "loguru>=0.7.3",
+    "pipecat-ai[daily,deepgram,elevenlabs,local-smart-turn-v3,openai,runner,webrtc,websocket]>=0.0.94",
+    "python-dotenv>=1.2.1",
+    "websockets>=15.0.1",
+]

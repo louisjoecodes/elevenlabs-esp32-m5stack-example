@@ -1,3 +1,5 @@
+<img width="1920" height="1080" alt="Twitter-Post-Template" src="https://github.com/user-attachments/assets/ec1bbc79-0104-4d4d-868e-831dc0cb5fc5" />
+
 # ElevenLabs ESP32 M5Stack Example
 
 Build real-time voice AI agents that run directly on ESP32 microcontrollers with WebRTC support.

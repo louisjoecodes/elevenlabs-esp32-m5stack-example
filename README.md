@@ -2,18 +2,6 @@
 
 Build real-time voice AI agents that run directly on ESP32 microcontrollers with WebRTC support.
 
-## Supported Devices
-
-This example has been developed and tested on the following ESP32-S3 devices:
-
-| Device | Directory | Status | Notes |
-|--------|-----------|--------|-------|
-| [ESP32-S3-BOX-3](https://www.digikey.com/short/fb2vjrpn) | `esp32-s3-box-3/` | ✅ Tested | Official Espressif dev board |
-| [M5Stack CoreS3](https://shop.m5stack.com/products/m5stack-cores3-esp32s3-lotdevelopment-kit) | `esp32-m5stack-cores3/` | ✅ Tested | Popular M5Stack kit |
-| [M5Stack AtomS3R](https://shop.m5stack.com/products/atoms3r-esp32s3-dev-kit-w-0-85-inch-screen) | `esp32-m5stack-atoms3r/` | ✅ Tested | Compact form factor |
-
-> **Note:** You can also build for `linux` target for testing without hardware, but audio functionality will be limited.
-
 ## Quick Start
 
 ### 1. Clone the Repository

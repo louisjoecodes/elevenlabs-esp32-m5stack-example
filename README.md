@@ -21,195 +21,97 @@ cd elevenlabs-esp32-m5stack-example
 git submodule update --init --recursive
 ```
 
-### 2. Install ESP-IDF
+### 2. Open in VS Code with PlatformIO
 
-Install the ESP-IDF toolchain v5.4+ following the [official installation guide](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/linux-macos-setup.html).
+1.  Install the **PlatformIO IDE** extension for VS Code.
+2.  **Open the specific folder for your device:**
+    *   **AtomS3R:** `pipecat-esp32/esp32-m5stack-atoms3r`
+    *   **CoreS3:** `pipecat-esp32/esp32-m5stack-cores3`
+    *   **S3 Box 3:** `pipecat-esp32/esp32-s3-box-3`
 
-**Important:** After installing ESP-IDF, verify submodules are initialized:
+### 3. Configure WiFi & Server Settings
 
-```bash
-cd $IDF_PATH
-git submodule update --init --recursive
-```
+Since we are using PlatformIO for a hackathon, the most reliable way to configure credentials is to hardcode them directly in the source file (this avoids complex shell escaping issues).
 
-### 3. Set Up Your Environment
+1.  Open `src/wifi.cpp` in your device folder.
+2.  Edit the `HACKATHON_WIFI_SSID` and `HACKATHON_WIFI_PASS` defines at the top:
 
-Load ESP-IDF tools in your terminal:
+    ```cpp
+    #define HACKATHON_WIFI_SSID "YourWiFiName"
+    #define HACKATHON_WIFI_PASS "YourWiFiPassword"
+    ```
 
-```bash
-source $IDF_PATH/export.sh
-```
+    *   **For iPhone Hotspots:** Ensure "Maximize Compatibility" is ON in your phone settings (ESP32 requires 2.4GHz WiFi).
 
-Find your local IP address (the ESP32 will use this to connect to your server):
+3.  Open `src/http.cpp` in your device folder.
+4.  Edit the `HACKATHON_SERVER_URL` define at the top:
 
-**macOS:**
-```bash
-ipconfig getifaddr en0
-```
+    ```cpp
+    #define HACKATHON_SERVER_URL "http://YOUR_LAPTOP_IP:7860/api/offer"
+    ```
 
-**Linux:**
-```bash
-hostname -I | awk '{print $1}'
-```
+    *   **Finding your IP:**
+        *   **macOS:** `ipconfig getifaddr en0`
+        *   **Linux:** `hostname -I`
+        *   **Windows:** `ipconfig`
 
-Configure your WiFi and Pipecat server URL with your IP address:
+### 4. Build & Upload
 
-```bash
-export WIFI_SSID="YourNetworkName"
-export WIFI_PASSWORD="YourPassword"
-export PIPECAT_SMALLWEBRTC_URL="http://YOUR_IP:7860/api/offer"
-```
+1.  Click the **PlatformIO Alien icon** in the left sidebar.
+2.  Expand your project tasks.
+3.  Click **Upload and Monitor**.
 
-Replace `YOUR_IP` with the IP address from above (e.g., `http://192.168.1.10:7860/api/offer`).
+### 5. Run the Python Server
 
-### 4. Build for Your Device
-
-Navigate to your device directory:
-
-```bash
-# For M5Stack AtomS3R
-cd esp32-m5stack-atoms3r
-```
-
-Set the target and build:
+Open a new terminal in the root directory:
 
 ```bash
-idf.py --preview set-target esp32s3
-idf.py build
+cd server
+cp .env.example .env
 ```
 
-### 5. Flash to Device
-
-**macOS:**
-```bash
-idf.py flash
+Edit `.env` and add your API keys:
+```env
+DEEPGRAM_API_KEY=your_key_here
+ELEVENLABS_API_KEY=your_key_here
+ELEVENLABS_VOICE_ID=your_voice_id_here
+OPENAI_API_KEY=your_key_here
 ```
 
-**Linux:**
-```bash
-idf.py -p /dev/ttyACM0 flash
-```
-
-If on linux: Find your device port with `ls /dev/tty*` or `sudo dmesg | grep tty`.
-
-### 6. Monitor Serial Output
+Install dependencies and start the server:
 
 ```bash
-idf.py monitor
+# Using uv (fast)
+uv sync
+uv run bot.py --host 0.0.0.0 --esp32
+
+# Or standard pip
+pip install -r requirements.txt
+python bot.py --host 0.0.0.0 --esp32
 ```
 
-Press `Ctrl+]` to exit the monitor.
-
-## ▶️ Usage
-
-### Running a Pipecat Bot with ElevenLabs TTS, Deepgram STT + OpenAI
-
-1. **Set up the server environment:**
-
-   ```bash
-   cd server
-   cp .env.example .env
-   ```
-
-   Edit `.env` and add your API keys:
-   ```
-   DEEPGRAM_API_KEY=your_key_here
-   ELEVENLABS_API_KEY=your_key_here
-   ELEVENLABS_VOICE_ID=your_voice_id_here
-   OPENAI_API_KEY=your_key_here
-   ```
-
-2. **Install dependencies and start the server:**
-
-   ```bash
-   uv sync
-   uv run bot.py --host 0.0.0.0 --esp32
-   ```
-
-   The server will start on port 7860. Keep this terminal running.
-
-3. **Connect your ESP32:**
-
-   Your device should now connect to WiFi and establish a WebRTC connection to your Pipecat bot!
-
-   If you haven't flashed your device yet, run:
-   ```bash
-   idf.py flash monitor
-   ```
+The server will start on port **7860**.
 
 ## 🔧 Troubleshooting
 
 ### Error: "Failed to resolve component 'srtp'"
+**Solution:** Run `git submodule update --init --recursive` in the project root.
 
-**Cause:** Git submodules weren't initialized.
+### Device Not Connecting to WiFi?
+1.  **Check Frequency:** ESP32 only supports 2.4GHz. If using a phone hotspot, enable "Maximize Compatibility".
+2.  **Check Password:** Verify the password in `src/wifi.cpp` is correct.
+3.  **Check Logs:** Look at the Serial Monitor output in VS Code.
 
-**Solution:**
-```bash
-cd /path/to/pipecat-esp32
-git submodule update --init --recursive
-```
-
-### Error: "Include directory ... is not a directory"
-
-**Cause:** ESP-IDF submodules are incomplete.
-
-**Solution:**
-```bash
-cd $IDF_PATH
-git submodule update --init --recursive
-```
-
-### Error: "Directory 'build' doesn't seem to be a CMake build directory"
-
-**Cause:** Incomplete build artifacts.
-
-**Solution:**
-```bash
-rm -rf build
-idf.py --preview set-target esp32s3
-```
-
-### Device Not Connecting to WiFi
-
-1. Double-check your WiFi credentials:
-   ```bash
-   echo $WIFI_SSID
-   echo $WIFI_PASSWORD
-   ```
-
-2. Ensure your network is 2.4GHz (ESP32 doesn't support 5GHz)
-
-3. Check serial output for connection errors:
-   ```bash
-   idf.py monitor
-   ```
-
-### WebRTC Connection Fails
-
-1. Verify the Pipecat server is running and accessible
-
-2. Test the URL from your development machine:
-   ```bash
-   curl http://YOUR_IP:7860/api/offer
-   ```
-
-3. Ensure ESP32 and server are on the same network
-
-4. Check firewall rules aren't blocking port 7860
-
-The M5Stack projects reference shared components from `esp32-s3-box-3/components/`.
+### Connection Timed Out (WebRTC)?
+1.  **Check IP:** Ensure `src/http.cpp` has your computer's *current* local IP.
+2.  **Check Firewall:** Your computer firewall might block the connection. Temporarily disable it or allow Python to accept incoming connections.
+3.  **Test Server:** Run `curl http://YOUR_IP:7860/api/offer` from your terminal. If it hangs or fails, the server isn't reachable.
 
 ## Key Components
-
 - **libpeer**: WebRTC implementation for embedded systems
 - **libsrtp**: Secure Real-time Transport Protocol
 - **esp-libopus**: Opus audio codec for ESP32
-- **esp_codec_dev**: Espressif audio codec driver
-
 
 ## 🔗 Related Projects
-
 - [ElevenLabs](https://elevenlabs.io/docs/overview)
-- [Pipecat](https://github.com/pipecat-ai/pipecat) - Framework for building voice and multimodal AI agents
-
----
+- [Pipecat](https://github.com/pipecat-ai/pipecat)

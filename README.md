@@ -72,7 +72,6 @@ cp .env.example .env
 
 Edit `.env` and add your API keys:
 ```env
-DEEPGRAM_API_KEY=your_key_here
 ELEVENLABS_API_KEY=your_key_here
 ELEVENLABS_VOICE_ID=your_voice_id_here
 OPENAI_API_KEY=your_key_here
